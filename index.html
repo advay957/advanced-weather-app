@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aether | Advanced Weather Intelligence</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin="" />
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Navigation -->
+        <aside class="sidebar glass">
+            <div class="logo">
+                <i class="fa-solid fa-cloud-bolt"></i>
+                <span>Aether</span>
+            </div>
+
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="cityInput" placeholder="Search city..." autocomplete="off">
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-view="dashboard">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard
+                </button>
+                <button class="nav-item" data-view="map">
+                    <i class="fa-solid fa-map"></i> Map View
+                </button>
+                <button class="nav-item" data-view="saved">
+                    <i class="fa-solid fa-heart"></i> Favorites
+                </button>
+            </nav>
+
+            <div class="favorites-list" id="sidebarFavorites">
+                <!-- Populated by JS -->
+            </div>
+
+            <div class="sidebar-footer">
+                <button id="unitToggle" class="icon-btn" title="Toggle Units">
+                    <span class="unit-c active">°C</span> / <span class="unit-f">°F</span>
+                </button>
+                <button id="themeToggle" class="icon-btn" title="Toggle Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="location-info">
+                    <h1 id="locationName">Loading...</h1>
+                    <span id="currentDate">--</span>
+                </div>
+                <div class="actions">
+                    <button id="refreshBtn" class="btn-glass"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button id="shareBtn" class="btn-glass"><i class="fa-solid fa-share-nodes"></i></button>
+                    <button id="addToFavBtn" class="btn-glass"><i class="fa-regular fa-heart"></i></button>
+                </div>
+            </header>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid" id="dashboardView">
+
+                <!-- Hero Card: Current Weather -->
+                <div class="card hero-card glass">
+                    <div class="hero-bg" id="heroBg"></div> <!-- Dynamic BG -->
+                    <div class="hero-content">
+                        <div class="temp-display">
+                            <span id="currentTemp">--</span><span class="degree">°</span>
+                        </div>
+                        <div class="weather-state">
+                            <img id="weatherIcon" src="" alt="Weather Icon">
+                            <span id="weatherDesc">--</span>
+                        </div>
+                        <div class="high-low">
+                            <span>H: <span id="tempMax">--</span>°</span>
+                            <span>L: <span id="tempMin">--</span>°</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Air Quality -->
+                <div class="card aqi-card glass">
+                    <h3>Air Quality</h3>
+                    <div class="aqi-gauge">
+                        <div class="aqi-value" id="aqiValue">--</div>
+                        <div class="aqi-label" id="aqiLabel">--</div>
+                    </div>
+                    <div class="pollutants" id="pollutants">
+                        <!-- PM2.5, etc -->
+                    </div>
+                </div>
+
+                <!-- UV Index -->
+                <div class="card uv-card glass">
+                    <h3>UV Index</h3>
+                    <div class="uv-meter" id="uvMeter">
+                        <!-- Canvas or CSS meter -->
+                        <span id="uvValue">--</span>
+                    </div>
+                </div>
+
+                <!-- Wind Status -->
+                <div class="card wind-card glass">
+                    <h3>Wind Status</h3>
+                    <div class="wind-compass">
+                        <div class="arrow" id="windArrow"></div>
+                        <div class="direction" id="windDir">--</div>
+                    </div>
+                    <div class="wind-speed">
+                        <span id="windSpeed">--</span> <small>km/h</small>
+                    </div>
+                </div>
+
+                <!-- Sunrise & Sunset -->
+                <div class="card sun-card glass">
+                    <h3>Sunrise & Sunset</h3>
+                    <div class="sun-times">
+                        <div class="sun-item">
+                            <i class="fa-solid fa-sun"></i>
+                            <div>
+                                <span class="label">Sunrise</span>
+                                <span class="time" id="sunriseTime">--:--</span>
+                            </div>
+                        </div>
+                        <div class="sun-item">
+                            <i class="fa-solid fa-moon"></i>
+                            <div>
+                                <span class="label">Sunset</span>
+                                <span class="time" id="sunsetTime">--:--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Humidity -->
+                <div class="card humidity-card glass">
+                    <h3>Humidity</h3>
+                    <div class="metric-big">
+                        <span id="humidityVal">--</span><small>%</small>
+                    </div>
+                    <div class="metric-desc" id="humidityDesc">--</div>
+                </div>
+
+                <!-- Visibility -->
+                <div class="card visibility-card glass">
+                    <h3>Visibility</h3>
+                    <div class="metric-big">
+                        <span id="visibilityVal">--</span><small>km</small>
+                    </div>
+                    <div class="metric-desc" id="visibilityDesc">--</div>
+                </div>
+
+                <!-- Pressure -->
+                <div class="card pressure-card glass">
+                    <h3>Pressure</h3>
+                    <div class="metric-big">
+                        <span id="pressureVal">--</span><small>hPa</small>
+                    </div>
+                </div>
+
+                <!-- Hourly Forecast (Wide) -->
+                <div class="card hourly-card glass">
+                    <h3>Hourly Forecast</h3>
+                    <div class="chart-container">
+                        <canvas id="hourlyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 5 Day Forecast (Tall) -->
+                <div class="card forecast-card glass">
+                    <h3>5-Day Forecast</h3>
+                    <div class="forecast-list" id="forecastList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+            </div> <!-- End Dashboard Grid -->
+
+            <!-- Map View (Hidden by default) -->
+            <div class="map-view hidden" id="mapView">
+                <div id="weatherMap"></div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
